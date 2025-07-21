@@ -1,0 +1,16 @@
+{
+  "files": {
+    "BetterGI.Install.0.47.0.exe": {
+      "chunks": [
+        "chunks/BetterGI.Install.0.47.0.exe/xaa"
+      ],
+	  "metadata": {
+        "size": 258936502,
+        "acceptRanges": "bytes",
+        "chunksSize": [26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 23006902],
+        "chunkCount": 10,
+        "concurrentDownload": 10
+      }
+    }
+  }
+} 

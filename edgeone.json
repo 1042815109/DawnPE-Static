@@ -1,0 +1,12 @@
+{
+	"buildCommand": "npm run build",
+	"installCommand": "npm install",
+	"outputDirectory": "dist",
+    "headers": [
+      {
+        "source": "/stream/BetterGI.Install.0.47.0.exe",
+        "headers": [
+        ]
+      }
+    ]
+}

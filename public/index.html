@@ -1,0 +1,588 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚀 百万瓦小金库</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            color: #4a5568;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+
+        .download-section {
+            margin: 20px 0;
+            padding: 20px;
+            /*border: 2px dashed #e2e8f0;*/
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .download-btn {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            font-size: 15px;
+            border-radius: 18px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+        }
+
+        .download-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .download-btn:disabled {
+            background: #cbd5e0;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+
+        .progress-container {
+            margin: 20px 0;
+            display: none;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 20px;
+            background: #e2e8f0;
+            border-radius: 10px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            width: 0%;
+            transition: width 0.3s ease;
+        }
+
+        .status {
+            margin: 10px 0;
+            padding: 10px;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+
+        .status.info {
+            background: #bee3f8;
+            color: #2b6cb0;
+        }
+
+        .status.success {
+            background: #c6f6d5;
+            color: #2f855a;
+        }
+
+        .status.error {
+            background: #fed7d7;
+            color: #c53030;
+        }
+
+        .file-info {
+            background: #f7fafc;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            border-left: 4px solid #667eea;
+        }
+
+        .file-info h3 {
+            margin: 0 0 10px 0;
+            color: #4a5568;
+        }
+
+        .file-info p {
+            margin: 5px 0;
+            color: #718096;
+        }
+
+        .config-section {
+            display: none;
+            margin: 20px 0;
+            padding: 20px;
+            background: #f7fafc;
+            border-radius: 10px;
+        }
+
+        .config-section h3 {
+            margin: 0 0 15px 0;
+            color: #4a5568;
+        }
+
+        .config-input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #e2e8f0;
+            border-radius: 5px;
+            font-size: 14px;
+            margin: 5px 0;
+        }
+
+        .config-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        .file-info div[style*='display: flex'] {
+            /* 保证默认横向排列 */
+            flex-direction: row;
+        }
+        @media (max-width: 600px) {
+            .file-info div[style*='display: flex'] {
+                flex-direction: column !important;
+                align-items: stretch !important;
+                gap: 10px !important;
+            }
+            .file-info .download-btn {
+                min-width: unset !important;
+                width: 100%;
+                margin-left: 0 !important;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🚀 百万瓦小金库</h1>
+        
+        <div class="config-section">
+            <h3>📋 配置文件设置</h3>
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <label for="configUrl" style="margin: 0; white-space: nowrap;">配置文件路径:</label>
+                <input type="text" id="configUrl" class="config-input" value="./config.json" placeholder="输入config.json的路径" style="width: 220px; max-width: 60vw; display: inline-block;">
+            </div>
+            <p style="font-size: 10px; color: #718096; margin-top: 5px;">
+                默认使用当前目录下的config.json文件，可通过URL参数 ?config= 直接设置配置文件路径
+            </p>
+        </div>
+
+        <div class="file-info" id="fileInfo" style="display: none; flex-direction: column; gap: 16px;"></div>
+
+        <div class="progress-container" id="progressContainer">
+            <div class="status info" id="status">准备下载...</div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div id="progressText">0%</div>
+        </div>
+    </div>
+
+    <script src="./StreamSaver.min.js"></script>
+    <script>
+        let downloadInProgress = false;
+        let totalChunks = 0;
+        let processedChunks = 0;
+
+        async function startDownload(fileKey, options = {}) {
+            if (downloadInProgress) {
+                alert('下载正在进行中，请等待完成');
+                return;
+            }
+            const configUrl = document.getElementById('configUrl').value.trim() || './config.json';
+            const progressContainer = document.getElementById('progressContainer');
+            const status = document.getElementById('status');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            try {
+                downloadInProgress = true;
+                document.querySelectorAll('.download-btn').forEach(btn => { btn.disabled = true; btn.textContent = '⏳ 下载中...'; });
+                progressContainer.style.display = 'block';
+                status.textContent = '正在获取配置文件...';
+                status.className = 'status info';
+                // 获取配置文件
+                const configResponse = await fetch(configUrl);
+                if (!configResponse.ok) {
+                    throw new Error(`配置文件获取失败: ${configResponse.status}`);
+                }
+                const config = await configResponse.json();
+                const file = config.files[fileKey];
+                if (!file) throw new Error('配置文件无有效文件信息');
+                const totalChunks = file.chunks.length;
+                const totalSize = file.metadata && file.metadata.size ? file.metadata.size : 0;
+                const chunksSize = file.metadata && file.metadata.chunksSize ? file.metadata.chunksSize : [];
+                let downloadedBytes = 0;
+                let processedChunks = 0;
+                // 计算每个分片的起始位置
+                const chunkPositions = [];
+                let currentPosition = 0;
+                for (let i = 0; i < file.chunks.length; i++) {
+                    chunkPositions.push(currentPosition);
+                    currentPosition += chunksSize[i] || 0;
+                }
+                // 优先用fsaa
+                let useFsaa = !!window.showSaveFilePicker;
+                let fileHandle, writable;
+                try {
+                    if (useFsaa && !options.onlyStreamSaver) {
+                        status.textContent = '正在请求保存位置...';
+                        fileHandle = await window.showSaveFilePicker({
+                            suggestedName: fileKey,
+                            types: [{
+                                description: '所有文件',
+                                accept: {'*/*': ['.' + fileKey.split('.').pop()]}
+                            }]
+                        });
+                        writable = await fileHandle.createWritable();
+                        status.textContent = '正在下载...';
+                        for (let i = 0; i < totalChunks; i++) {
+                            const chunkName = file.chunks[i];
+                            const chunkUrl = getChunkUrl(chunkName);
+                            const resp = await fetch(chunkUrl);
+                            if (!resp.ok) throw new Error(`分片获取失败: ${chunkName}`);
+                            const reader = resp.body.getReader();
+                            let written = 0;
+                            while (true) {
+                                const { done, value } = await reader.read();
+                                if (done) break;
+                                await writable.write({ type: 'write', position: chunkPositions[i] + written, data: value });
+                                written += value.length;
+                                downloadedBytes += value.length;
+                                const progress = totalSize ? (downloadedBytes / totalSize) * 100 : (processedChunks / totalChunks) * 100;
+                                updateProgress(progress, downloadedBytes, totalSize);
+                            }
+                            reader.releaseLock();
+                            processedChunks++;
+                        }
+                        status.textContent = '正在合并文件...';
+                        status.className = 'status info';
+                        await writable.close();
+                        status.textContent = '✅ 下载完成！';
+                        status.className = 'status success';
+                        progressFill.style.width = '100%';
+                        progressText.textContent = totalSize ? `${formatSize(totalSize)}/${formatSize(totalSize)} (100%)` : '100%';
+                    } else if (!useFsaa && options.onlyFsaa) {
+                        throw new Error('fsaa不支持或未授权');
+                    } else if (!options.onlyFsaa) {
+                        throw new Error('fsaa不支持或未授权');
+                    }
+                } catch (fsaaErr) {
+                    // 降级为streamsaver
+                    if (options.onlyFsaa) throw fsaaErr;
+                    if (options.onlyStreamSaver) {
+                        status.textContent = '正在使用StreamSaver下载...';
+                        status.className = 'status info';
+                    } else {
+                        status.textContent = '正在使用兼容模式（StreamSaver）下载...';
+                        status.className = 'status info';
+                    }
+                    const fileStream = window.streamSaver.createWriteStream(fileKey);
+                    const writer = fileStream.getWriter();
+                    for (let i = 0; i < totalChunks; i++) {
+                        const chunkName = file.chunks[i];
+                        const chunkUrl = getChunkUrl(chunkName);
+                        const resp = await fetch(chunkUrl);
+                        if (!resp.ok) throw new Error(`分片获取失败: ${chunkName}`);
+                        const reader = resp.body.getReader();
+                        while (true) {
+                            const { done, value } = await reader.read();
+                            if (done) break;
+                            await writer.write(value);
+                            if (value) downloadedBytes += value.length;
+                            const progress = totalSize ? (downloadedBytes / totalSize) * 100 : (processedChunks / totalChunks) * 100;
+                            updateProgress(progress, downloadedBytes, totalSize);
+                        }
+                        reader.releaseLock();
+                        processedChunks++;
+                    }
+                    status.textContent = '正在合并文件...';
+                    status.className = 'status info';
+                    await writer.close();
+                    status.textContent = '✅ 下载完成！（兼容模式）';
+                    status.className = 'status success';
+                    progressFill.style.width = '100%';
+                    progressText.textContent = totalSize ? `${formatSize(totalSize)}/${formatSize(totalSize)} (100%)` : '100%';
+                }
+            } catch (error) {
+                console.error('下载错误:', error);
+                status.textContent = `❌ 下载失败: ${error.message}`;
+                status.className = 'status error';
+            } finally {
+                downloadInProgress = false;
+                document.querySelectorAll('.download-btn').forEach(btn => { btn.disabled = false; btn.textContent = '📥 开始下载'; });
+            }
+        }
+
+        function getChunkUrl(chunkName) {
+            const host = window.location.origin;
+            if (chunkName.startsWith('http://') || chunkName.startsWith('https://')) {
+                return chunkName;
+            }
+            if (chunkName.startsWith('/')) {
+                return `${host}${chunkName}`;
+            }
+            return `${host}/${chunkName}`;
+        }
+
+        async function showFileInfo(configUrl) {
+            try {
+                const response = await fetch(configUrl);
+                if (!response.ok) return;
+                
+                const config = await response.json();
+                const fileInfo = document.getElementById('fileInfo');
+                fileInfo.innerHTML = '';
+                Object.entries(config.files).forEach(([key, file]) => {
+                    const size = file.metadata && file.metadata.size ? file.metadata.size : 0;
+                    // 每个文件一行，右侧有下载按钮
+                    const row = document.createElement('div');
+                    row.style.display = 'flex';
+                    row.style.alignItems = 'center';
+                    row.style.justifyContent = 'space-between';
+                    row.style.gap = '20px';
+                    row.innerHTML = `<div style='flex:1;'><strong>${key}</strong><br><span style='color:#718096;'>${formatSize(size)}</span></div>`;
+                    const btn = document.createElement('button');
+                    btn.className = 'download-btn';
+                    btn.style.minWidth = '140px';
+                    btn.textContent = '📥 开始下载';
+                    btn.onclick = () => startDownload(key);
+                    row.appendChild(btn);
+                    // 极速下载按钮
+                    const fastBtn = document.createElement('button');
+                    fastBtn.className = 'download-btn';
+                    fastBtn.style.minWidth = '120px';
+                    fastBtn.style.marginLeft = '8px';
+                    fastBtn.textContent = '⚡ 极速下载';
+                    fastBtn.style.background = 'linear-gradient(45deg, #38a169, #48bb78)';
+                    fastBtn.style.boxShadow = '0 4px 15px rgba(56, 161, 105, 0.4)';
+                    fastBtn.onclick = () => fastDownload(key);
+                    row.appendChild(fastBtn);
+                    fileInfo.appendChild(row);
+                });
+                fileInfo.style.display = 'flex';
+            } catch (error) {
+                console.error('获取文件信息失败:', error);
+            }
+        }
+
+        function updateProgress(percentage, downloadedBytes, totalSize) {
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            const status = document.getElementById('status');
+            
+            progressFill.style.width = `${percentage}%`;
+            if (totalSize) {
+                progressText.textContent = `${formatSize(downloadedBytes)}/${formatSize(totalSize)} (${Math.round(percentage)}%)`;
+                status.textContent = `下载进度: ${formatSize(downloadedBytes)}/${formatSize(totalSize)} (${Math.round(percentage)}%)`;
+            } else {
+                progressText.textContent = `${Math.round(percentage)}%`;
+                status.textContent = `下载进度: ${processedChunks}/${totalChunks} 分片 (${Math.round(percentage)}%)`;
+            }
+        }
+
+        // 文件大小格式化函数
+        function formatSize(bytes) {
+            if (bytes >= 1024 * 1024 * 1024) {
+                return (bytes / (1024 * 1024 * 1024)).toFixed(2) + ' GB';
+            } else if (bytes >= 1024 * 1024) {
+                return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+            } else if (bytes >= 1024) {
+                return (bytes / 1024).toFixed(2) + ' KB';
+            } else {
+                return bytes + ' B';
+            }
+        }
+
+        // 页面加载时自动获取文件信息
+        window.addEventListener('load', () => {
+            // 支持通过URL参数config指定配置文件路径
+            function getQueryParam(name) {
+                const params = new URLSearchParams(window.location.search);
+                return params.get(name);
+            }
+            const configInput = document.getElementById('configUrl');
+            const urlConfig = getQueryParam('config');
+            if (urlConfig) {
+                configInput.value = urlConfig;
+            }
+            const configUrl = configInput.value;
+
+            // file参数最高优先级，直接重定向
+            const fileParam = getQueryParam('file');
+            if (fileParam) {
+                const { protocol, host } = window.location;
+                window.location.href = `${protocol}//${host}/range/${fileParam}`;
+                return;
+            }
+
+            // 其余参数在config加载后再处理
+            const blobParam = getQueryParam('blob');
+            const fsaaParam = getQueryParam('fsaa');
+            const streamParam = getQueryParam('streamsaver') || getQueryParam('stream');
+
+            // showFileInfo加载后自动触发下载
+            function autoDownloadAfterConfig() {
+                if (blobParam) {
+                    fastDownload(blobParam);
+                } else if (fsaaParam) {
+                    startDownload(fsaaParam, { onlyFsaa: true });
+                } else if (streamParam) {
+                    startDownload(streamParam, { onlyStreamSaver: true });
+                }
+            }
+            showFileInfo(configUrl);
+            setTimeout(autoDownloadAfterConfig, 0); // 保证渲染后再触发
+            
+            // 显示当前路径信息
+            showPathInfo();
+
+            // 监听configUrl输入框失去焦点或回车，刷新文件列表
+            configInput.addEventListener('blur', function() {
+                showFileInfo(this.value.trim() || './config.json');
+            });
+            configInput.addEventListener('keydown', function(e) {
+                if (e.key === 'Enter') {
+                    showFileInfo(this.value.trim() || './config.json');
+                }
+            });
+        });
+
+        function showPathInfo() {
+            const currentPath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/') + 1);
+            const host = window.location.origin;
+            
+            console.log('当前页面路径:', currentPath);
+            console.log('当前域名:', host);
+            console.log('完整URL:', host + currentPath);
+            
+            // 在页面上显示路径信息（可选）
+            const pathInfo = document.createElement('div');
+            pathInfo.style.cssText = 'background: #f0f0f0; padding: 10px; margin: 10px 0; border-radius: 5px; font-size: 12px; color: #666;';
+            pathInfo.innerHTML = `
+                <strong>路径信息:</strong><br>
+                当前页面路径: ${currentPath}<br>
+                域名: ${host}<br>
+                完整URL: ${host}${currentPath}
+            `;
+            
+            // 将路径信息插入到配置区域后面
+            const configSection = document.querySelector('.config-section');
+            configSection.appendChild(pathInfo);
+        }
+
+        // 极速下载实现（始终全内存高并发blob）
+        async function fastDownload(fileKey) {
+            if (downloadInProgress) {
+                alert('下载正在进行中，请等待完成');
+                return;
+            }
+            const configUrl = document.getElementById('configUrl').value.trim() || './config.json';
+            const progressContainer = document.getElementById('progressContainer');
+            const status = document.getElementById('status');
+            const progressFill = document.getElementById('progressFill');
+            const progressText = document.getElementById('progressText');
+            try {
+                downloadInProgress = true;
+                document.querySelectorAll('.download-btn').forEach(btn => { btn.disabled = true; });
+                progressContainer.style.display = 'block';
+                status.textContent = '正在获取配置文件...';
+                status.className = 'status info';
+                // 获取配置文件
+                const configResponse = await fetch(configUrl);
+                if (!configResponse.ok) throw new Error(`配置文件获取失败: ${configResponse.status}`);
+                const config = await configResponse.json();
+                const file = config.files[fileKey];
+                if (!file) throw new Error('配置文件无有效文件信息');
+                const totalSize = file.metadata && file.metadata.size ? file.metadata.size : 0;
+                const chunksSize = file.metadata && file.metadata.chunksSize ? file.metadata.chunksSize : [];
+                const concurrentDownload = file.metadata && file.metadata.concurrentDownload ? file.metadata.concurrentDownload : 3;
+                const totalChunks = file.chunks.length;
+                let downloadedBytes = 0;
+                let completedChunks = 0;
+                // 计算每个分片的起始位置
+                let chunkOffsets = [];
+                let pos = 0;
+                for (let i = 0; i < totalChunks; i++) {
+                    chunkOffsets.push(pos);
+                    pos += chunksSize[i] || 0;
+                }
+                // 预分配大内存
+                const buffer = new Uint8Array(totalSize);
+                // 并发下载所有分片
+                let errorOccurred = false;
+                async function downloadChunkToBuffer(chunkIndex, buffer, offset) {
+                    const chunkName = file.chunks[chunkIndex];
+                    const chunkUrl = getChunkUrl(chunkName);
+                    const resp = await fetch(chunkUrl);
+                    if (!resp.ok) throw new Error(`分片获取失败: ${chunkName}`);
+                    const reader = resp.body.getReader();
+                    let written = 0;
+                    while (true) {
+                        const { done, value } = await reader.read();
+                        if (done) break;
+                        buffer.set(value, offset + written);
+                        written += value.length;
+                        downloadedBytes += value.length;
+                        const progress = totalSize ? (downloadedBytes / totalSize) * 100 : (completedChunks / totalChunks) * 100;
+                        updateProgress(progress, downloadedBytes, totalSize);
+                    }
+                    reader.releaseLock();
+                }
+                await Promise.all(Array.from({length: totalChunks}, (_, i) =>
+                    downloadChunkToBuffer(i, buffer, chunkOffsets[i]).then(() => {
+                        completedChunks++;
+                        status.textContent = `极速下载：${completedChunks}/${totalChunks} 分片`;
+                    }).catch(err => {
+                        errorOccurred = true;
+                        throw err;
+                    })
+                ));
+                if (errorOccurred) throw new Error('有分片下载失败');
+                // 合并提示
+                status.textContent = '正在合并文件...';
+                status.className = 'status info';
+                // 合并所有分片
+                const mergedBlob = new Blob([buffer]);
+                // 触发浏览器下载
+                const blobUrl = URL.createObjectURL(mergedBlob);
+                const a = document.createElement('a');
+                a.href = blobUrl;
+                a.download = fileKey;
+                document.body.appendChild(a);
+                a.click();
+                setTimeout(() => {
+                    document.body.removeChild(a);
+                    URL.revokeObjectURL(blobUrl);
+                }, 1000);
+                status.textContent = '✅ 极速下载完成！';
+                status.className = 'status success';
+                progressFill.style.width = '100%';
+                progressText.textContent = totalSize ? `${formatSize(totalSize)}/${formatSize(totalSize)} (100%)` : '100%';
+            } catch (error) {
+                console.error('极速下载错误:', error);
+                status.textContent = `❌ 极速下载失败: ${error.message}`;
+                status.className = 'status error';
+            } finally {
+                downloadInProgress = false;
+                document.querySelectorAll('.download-btn').forEach(btn => { btn.disabled = false; });
+            }
+        }
+    </script>
+</body>
+</html> 
