@@ -1,16 +1,58 @@
 {
   "files": {
-    "BetterGI.Install.0.47.0.exe": {
+    "DawnPE-Lite-25H2-Build-250707.7z": {
       "chunks": [
-        "chunks/BetterGI.Install.0.47.0.exe/xaa"
+        "DawnPE-Lite-25H2-Build-250707.7z/xaa",
+        "DawnPE-Lite-25H2-Build-250707.7z/xab",
+        "DawnPE-Lite-25H2-Build-250707.7z/xac",
+        "DawnPE-Lite-25H2-Build-250707.7z/xad",
+        "DawnPE-Lite-25H2-Build-250707.7z/xae",
+        "DawnPE-Lite-25H2-Build-250707.7z/xaf",
+        "DawnPE-Lite-25H2-Build-250707.7z/xag",
+        "DawnPE-Lite-25H2-Build-250707.7z/xah",
+        "DawnPE-Lite-25H2-Build-250707.7z/xai",
+        "DawnPE-Lite-25H2-Build-250707.7z/xaj",
+        "DawnPE-Lite-25H2-Build-250707.7z/xak",
+        "DawnPE-Lite-25H2-Build-250707.7z/xal"
       ],
 	  "metadata": {
-        "size": 258936502,
+        "size": 299225771,
         "acceptRanges": "bytes",
-        "chunksSize": [26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 23006902],
-        "chunkCount": 10,
+        "chunksSize": [26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 10867371],
+        "chunkCount": 12,
+        "concurrentDownload": 6
+      }
+    },
+    "DawnPE-Plus-25H2-Build-250721.7z": {
+      "chunks": [
+        "DawnPE-Plus-25H2-Build-250721.7z/xaa",
+        "DawnPE-Plus-25H2-Build-250721.7z/xab",
+        "DawnPE-Plus-25H2-Build-250721.7z/xac",
+        "DawnPE-Plus-25H2-Build-250721.7z/xad",
+        "DawnPE-Plus-25H2-Build-250721.7z/xae",
+        "DawnPE-Plus-25H2-Build-250721.7z/xaf",
+        "DawnPE-Plus-25H2-Build-250721.7z/xag",
+        "DawnPE-Plus-25H2-Build-250721.7z/xah",
+        "DawnPE-Plus-25H2-Build-250721.7z/xai",
+        "DawnPE-Plus-25H2-Build-250721.7z/xaj",
+        "DawnPE-Plus-25H2-Build-250721.7z/xak",
+        "DawnPE-Plus-25H2-Build-250721.7z/xal",
+        "DawnPE-Plus-25H2-Build-250721.7z/xam",
+        "DawnPE-Plus-25H2-Build-250721.7z/xan",
+        "DawnPE-Plus-25H2-Build-250721.7z/xao",
+        "DawnPE-Plus-25H2-Build-250721.7z/xap",
+        "DawnPE-Plus-25H2-Build-250721.7z/xaq",
+        "DawnPE-Plus-25H2-Build-250721.7z/xar",
+        "DawnPE-Plus-25H2-Build-250721.7z/xas",
+        "DawnPE-Plus-25H2-Build-250721.7z/xat"
+      ],
+	  "metadata": {
+        "size": 513991223,
+        "acceptRanges": "bytes",
+        "chunksSize": [26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 26214400, 15917623],
+        "chunkCount": 20,
         "concurrentDownload": 10
       }
-    }
+    },
   }
 } 
