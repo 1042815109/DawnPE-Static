@@ -53,6 +53,6 @@
         "chunkCount": 20,
         "concurrentDownload": 10
       }
-    },
+    }
   }
-} 
+}
